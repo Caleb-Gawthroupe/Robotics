@@ -1,6 +1,9 @@
 from inputs import get_gamepad
+import pyautogui
 import math
 import threading
+
+pyautogui.PAUSE = 0
 
 class XboxController(object):
     MAX_TRIG_VAL = math.pow(2, 8)
@@ -91,15 +94,42 @@ class XboxController(object):
                 elif event.code == 'BTN_TRIGGER_HAPPY4':
                     self.DownDPad = event.state
 
+class Mouse():
+    def __init__(self):
+        self.x = 100
+        self.y = 100
+        self.speed = 0.25
+        self.deadzone = 0.05
+        self.can_click = True
+        
+    def move(self,left,right):
+        if abs(left) > self.deadzone:
+            self.x += left*self.speed
+        if abs(right) > self.deadzone:
+            self.y += right*self.speed*-1
+            
+    def click(self):
+        if joy.A == 1 and self.can_click == True:
+            self.can_click = False
+            pyautogui.click()
+        elif joy.A == 0:
+            self.can_click = True
 
 
 
 if __name__ == '__main__':
     joy = XboxController()
+    mouse = Mouse()
+    
     while True:
-        print(joy.read())
+        controller = joy.read()
+        print(controller)
+        mouse.pos = mouse.move(joy.LeftJoystickX,joy.LeftJoystickY)
+        mouse.click()
+        pyautogui.moveTo(mouse.x,mouse.y,0)
         
-        # Check if the Start button is pressed
+        # End the program if start key is pressed
         if joy.Back == 1:
             print("Start button is pressed. Stopping the program.")
             break
+        
